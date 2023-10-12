@@ -45,15 +45,15 @@ brfss=
   brfss_smart2010|> 
   janitor::clean_names() |> 
   rename(state = locationabbr) |> 
-  filter(topic== "Overall Health")
+  filter(topic== "Overall Health") |> 
+  mutate(response= factor(response, levels = c("Poor", "Fair", "Good", "Very good", "Excellent"))) |> 
+  arrange(response)
+  
 ```
 
 **Data Import Cleaning Steps**
 
-I imported the data directly into R from the p8105.datasets library which we already loaded for Question 1. Afterwards, I used the `janitor::clean_names()` to make all the variable names lower cased and replace any spaces with `_`. I renamed the locationabbr variable to state. Additionally, I filtered the dataset to only include observations where the topic was "Overall Health." Lastly, [ADD SENTENCE WHEN YOU SUCCESSFULLY DO THE VECTOR THING]
-
- --> organize responses as a factor taking levels ordered from “Poor” to “Excellent”
-
+I imported the data directly into R from the p8105.datasets library which we already loaded for Question 1. Afterwards, I used the `janitor::clean_names()` to make all the variable names lower cased and replace any spaces with `_`. I renamed the locationabbr variable to state. Additionally, I filtered the dataset to only include observations where the topic was "Overall Health." Lastly, I converted the response data from character to factor using the `factor()` function in R. I also arranged the dataset using `arrange` by the response variable with the recently ordered factor. 
 
 Using this dataset, do or answer the following (commenting on the results of each):
 
