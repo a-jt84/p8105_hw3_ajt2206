@@ -58,10 +58,11 @@ I imported the data directly into R from the p8105.datasets library which we alr
 Using this dataset, do or answer the following (commenting on the results of each):
 
 ```{r}
-brfss |> 
-  group_by(locationabbr) |> 
-  unique(locationdesc)
 
+```
+In 2002, which states were observed at 7 or more locations? What about in 2010?
+
+```{r}
 library(ggplot2)
   
 excellent_df=
@@ -72,10 +73,6 @@ excellent_df=
   select (year, state, mean_datavalue) |> 
   distinct(year, state, mean_datavalue, .keep_all = TRUE)
 
-```
-
-
-```{r}
 ggplot(excellent_df, aes(x= year, y= mean_datavalue, group=state, color=state))+
   geom_line(alpha=0.5)+
   labs(
@@ -85,9 +82,29 @@ ggplot(excellent_df, aes(x= year, y= mean_datavalue, group=state, color=state))+
   ) +
   theme_minimal()
 ```
+**Excellent Dataset and Spaghetti Plot**
 
-In 2002, which states were observed at 7 or more locations? What about in 2010?
+To construct the excellent dataset, I filtered brfss to only include values of "Excellent" for the response variable. I grouped the data by both year and state which allowed me to use the mutate function to create a new variable "mean_datavalue" which was the average of the data_value for each state separated by year. Afterwards, I used the `select()` function to select only the variables year, state, and mean_datavalue. Last, I used the `distinct()` function to only keep unique rows. 
 
-Construct a dataset that is limited to Excellent responses, and contains, year, state, and a variable that averages the data_value across locations within a state. Make a “spaghetti” plot of this average value over time within a state (that is, make a plot showing a line for each state across years – the geom_line geometry and group aesthetic will help). COMPLETED
+To make a "spaghetti" plot, I used `ggplot` specifying year on my x-axis, mean_datavalue on the y-axis, grouped by state and with each state as a different color. Moreover, I used `geom_line` to specify that I wanted a line graph. Other than that I used a few more functions to improve the aesthetics of the graph such as adding a title via the `labs()` function. 
 
+```{r}
+library(patchwork)
+
+dv_2006 =
+  brfss |> 
+  filter(year== "2006", state== "NY") |> 
+  ggplot(aes(x=response, y=data_value, color=locationdesc))+
+  geom_point(alpha=1.0)
+
+dv_2010 =
+  brfss |>  
+  filter(year== "2010", state== "NY") |> 
+  ggplot(aes(x=response, y=data_value, color=locationdesc))+
+  geom_point(alpha=1.0)
+  
+dv_2006+dv_2010
+```
+**Two-panel plot of data_value**
+To create a two-panel plot, I first loaded the patchwork library using `library()`. Next, I worked to create the plot for 2006. I filtered the brfss dataframe to only include year as 2006 and state as NY. Next, I used `ggplot` specifying that I want response as my x-value, data-value as my y value, and to color the points by locationdesc. Lastly, I used `geom_point`to tell R to make a scatterplot. I did the same steps for the 2010 plot except, I filtered for 2010. Last, to show the two plots side by side, I just wrote dv_2006+dv_2010`` (graph_1 + graph_2) which using patchwork puts the two graphs next to each other!
 Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
