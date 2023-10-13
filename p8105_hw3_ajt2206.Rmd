@@ -55,12 +55,20 @@ brfss=
 
 I imported the data directly into R from the p8105.datasets library which we already loaded for Question 1. Afterwards, I used the `janitor::clean_names()` to make all the variable names lower cased and replace any spaces with `_`. I renamed the locationabbr variable to state. Additionally, I filtered the dataset to only include observations where the topic was "Overall Health." Lastly, I converted the response data from character to factor using the `factor()` function in R. I also arranged the dataset using `arrange` by the response variable with the recently ordered factor. 
 
-Using this dataset, do or answer the following (commenting on the results of each):
-
 ```{r}
-
+brfss |> 
+  filter(year == "2002" | year== "2010") |> 
+  group_by(year, state) |> 
+  summarize(locations=n_distinct(locationdesc)) |> 
+   filter(locations>=7)
 ```
-In 2002, which states were observed at 7 or more locations? What about in 2010?
+**Multiple location states**
+
+To understand which states had 7 or more locations observed in 2002 and 2010 in the data, I filtered the dataset to only include years 2002 and 2010. I then grouped the data by year and state. Next, I summarized the data to create a column n which pulled how many unique locations were in each state per year. Lastly, I filtered to only states which had location >=7. 
+
+In 2002: There were 6 states which were observed at 7 or more locations. CT, FL, MA, NC, NJ, and PA. 
+
+In 2010: There were 14 states which were observed at 7 or more locations. CA, CO, FL, MA, MD, NC, NE, NJ, NY, OH, PA, SC, TX, WA. 
 
 ```{r}
 library(ggplot2)
@@ -108,3 +116,5 @@ dv_2006+dv_2010
 **Two-panel plot of data_value**
 To create a two-panel plot, I first loaded the patchwork library using `library()`. Next, I worked to create the plot for 2006. I filtered the brfss dataframe to only include year as 2006 and state as NY. Next, I used `ggplot` specifying that I want response as my x-value, data-value as my y value, and to color the points by locationdesc. Lastly, I used `geom_point`to tell R to make a scatterplot. I did the same steps for the 2010 plot except, I filtered for 2010. Last, to show the two plots side by side, I just wrote dv_2006+dv_2010`` (graph_1 + graph_2) which using patchwork puts the two graphs next to each other!
 Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
+
+
