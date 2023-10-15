@@ -5,17 +5,34 @@ date: "2023-10-06"
 output: github_document
 ---
 
-## Problem 1:
-
-**Loading data from library**
 ```{r}
 library(tidyverse)
 library(p8105.datasets)
 library(ggplot2)
 library(patchwork)
 
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+```
+## Problem 1:
+
+**Loading data from library**
+```{r}
 data("instacart")
 ```
+
 **Description of dataset and illustrative example**
 The Instacart dataset is an anonymized dataset from 2017 which details over 3 milion online grocery orders from more than 200,000 Instacart Users. Despite its large scale, the dataset still represents a random sample of the overall Instacart user base. There are `r nrow(instacart)` observations, each representing an order, and `r ncol(instacart)` variables in the dataset. The data is currently in horizontal form. Some of the key variables to note are: 
 
@@ -104,6 +121,7 @@ brfss |>
   summarize(locations=n_distinct(locationdesc)) |> 
    filter(locations>=7)
 ```
+
 To understand which states had 7 or more locations observed in 2002 and 2010 in the data, I filtered the dataset to only include years 2002 and 2010. I then grouped the data by year and state. Next, I summarized the data to create a column n which pulled how many unique locations were in each state per year. Lastly, I filtered to only states which had location >=7. 
 
 In 2002: There were 6 states which were observed at 7 or more locations. CT, FL, MA, NC, NJ, and PA. 
@@ -129,36 +147,31 @@ ggplot(excellent_df, aes(x= year, y= mean_datavalue, group=state, color=state))+
   ) +
   theme_minimal()
 ```
+
 To construct the excellent dataset, I filtered brfss to only include values of "Excellent" for the response variable. I grouped the data by both year and state which allowed me to use the mutate function to create a new variable "mean_datavalue" which was the average of the data_value for each state separated by year. Afterwards, I used the `select()` function to select only the variables year, state, and mean_datavalue. Last, I used the `distinct()` function to only keep unique rows. 
 
 To make a "spaghetti" plot, I used `ggplot` specifying year on my x-axis, mean_datavalue on the y-axis, grouped by state and with each state as a different color. Moreover, I used `geom_line` to specify that I wanted a line graph. Other than that I used a few more functions to improve the aesthetics of the graph such as adding a title via the `labs()` function. 
 
 **Two-panel plot of data_value**
 ```{r}
-dv_2006 =
-  brfss |> 
-  filter(year== "2006", state== "NY") |> 
+brfss |> 
+  filter(year %in% c("2006", "2010"), state== "NY") |> 
   ggplot(aes(x=response, y=data_value, color=locationdesc))+
-  geom_point(alpha=1.0)
-
-dv_2010 =
-  brfss |>  
-  filter(year== "2010", state== "NY") |> 
-  ggplot(aes(x=response, y=data_value, color=locationdesc))+
-  geom_point(alpha=1.0)
-  
-dv_2006+dv_2010
+  geom_point(alpha=3.0)+
+  facet_grid(. ~year)
 ```
+
 To create a two-panel plot, I first loaded the patchwork library using `library()`. Next, I worked to create the plot for 2006. I filtered the brfss dataframe to only include year as 2006 and state as NY. Next, I used `ggplot` specifying that I want response as my x-value, data-value as my y value, and to color the points by locationdesc. Lastly, I used `geom_point`to tell R to make a scatterplot. I did the same steps for the 2010 plot except, I filtered for 2010. Last, to show the two plots side by side, I just wrote dv_2006+dv_2010`` (graph_1 + graph_2) which using patchwork puts the two graphs next to each other!
 Make a two-panel plot showing, for the years 2006, and 2010, distribution of data_value for responses (“Poor” to “Excellent”) among locations in NY State.
 
 
-##Problem 3
+## Problem 3
 
 **Data Import and Initial Manip**
 ```{r}
 demo_df=
-  readxl::read_excel("Data/nhanes_covar.xlsx", range="A5:E255") |> 
+  read_csv("data/nhanes_covar.csv", 
+    skip = 4, na = ".")|> 
   janitor::clean_names() |> 
   filter(age >= "21", bmi != "NA") |> 
   mutate(
@@ -175,7 +188,7 @@ demo_df=
   )
 
 accel_df=
-  readxl::read_excel("Data/nhanes_accel.xlsx", range="A1:BCK251") |> 
+  read_csv("data/nhanes_accel.csv") |> 
   janitor::clean_names() |> 
   pivot_longer(
     min1:min1440,
@@ -189,6 +202,7 @@ accel_df=
 mims_combined_df=
   left_join(demo_df, accel_df, by= "seqn")
 ```
+
 **Data Import and Manipulation Description**
 
 I used `readxl()` to read in the nhanes_covar excel file into R and restricting only the range of cells I wanted. `janitor::clean_names()` to clean up imported variable names. I filtered the data to only include participants older than 21 and without NA values (for this data, the only data with NA once filtered on 21 and up was in the BMI). I updated sex and education to make the responses more easily identifiable. And I updated education to be a factor level variable using `factor()` within an overall `mutate()` function. 
@@ -218,6 +232,7 @@ demo_df |>
   theme_minimal() +
   theme(legend.title = element_blank())
 ```
+
 Process: To create an easily readable table of the number of men and women by education category, I grouped the data by sex and education  and used the `summarize()` function to create a create a count of each . Last, I switched the data to wide view using `pivot_wider` to make it more readable. 
 
 To visualize the data, I used the same grouping and summary, and then used the `ggplot` function with education on the axis, the number of observations on the y-axis, and fill as sex. I decided to use a bar graph which I made using `geom_bar()`. Afterwards, just some slight formatting and theme functions.
@@ -270,6 +285,7 @@ more_hs =
   
 less_hs / exact_hs / more_hs
 ```
+
 **Description of patterns on graph**
 Across education levels, younger people had higher levels of total MIMS than older populations. However, the level of decrease in total MIMS differed by level. Less than high school say the greatest difference in MIMS by age whereas More than high school saw the least. Women had higher total MIMs activity across all ages within the High school equivalent and more than high school education levels. However, within the Less than high school group, women below 45 had higher MIMS, but women above 45 had lower levels than men. 
 
@@ -285,5 +301,6 @@ mims_combined_df |>
   facet_grid(. ~education)
 
 ```
+
 **Patterns in the data**
-Based on the graph, we can see that MIMS are lowest in the early morning and increase throughout the day until plateuing through the afternoon before once again decreasing in the night. We see that women appear to have lower values of MIMS in the late night and early morning, but generally have higher values throughout other parts of the day..
+Based on the graph, we can see that MIMS are lowest in the early morning and increase throughout the day until plateuing through the afternoon before once again decreasing in the night. We see that women appear to have lower values of MIMS in the late night and early morning, but generally have higher values throughout other parts of the day.
